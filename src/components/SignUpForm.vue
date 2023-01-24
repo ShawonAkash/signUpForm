@@ -35,7 +35,7 @@
         Passwords do not match
       </p>
       <label>Interests:</label>
-      <TagList v-model="selectedOptions" :options="options" :max="3" />
+      <TagList v-model="selectedTags" :tags="availableTags" :max-tags="3" />
       <p class="text-red-500" v-if="errors.interests">
         Please select at least one interest
       </p>
@@ -60,7 +60,7 @@
         <tr v-for="form in forms" :key="form.id">
           <td class="px-4 py-2">{{ form.name }}</td>
           <td class="px-4 py-2">{{ form.email }}</td>
-          <td>{{ selectedOptions.join(', ') }}</td>
+          <td>{{ selectedTags.join(', ') }}</td>
         </tr>
       </tbody>
     </table>
@@ -82,8 +82,8 @@ export default defineComponent({
     const email = ref('')
     const password = ref('')
     const confirmPassword = ref('')
-    const selectedOptions = ref([])
-     const options = ['Work', 'Education', 'Hobby', 'Freelance', 'Business']
+    const selectedTags = ref([])
+    const availableTags = ref(['Work', 'Education', 'Hobby', 'Freelance', 'Business'])
     const errors = ref({
       name: false,
       email: false,
@@ -117,7 +117,7 @@ export default defineComponent({
         const formData = {
           name: name.value,
           email: email.value,
-          selectedOptions: selectedOptions.value
+          interests: selectedTags.value
         }
         console.log(formData)
         await axios.post('/db.json', formData)
@@ -126,7 +126,7 @@ export default defineComponent({
         email.value = ''
         password.value = ''
         confirmPassword.value = ''
-        selectedOptions.value = []
+        selectedTags.value = []
       } catch (error) {
         console.log(error)
       }
@@ -137,10 +137,8 @@ export default defineComponent({
       email,
       password,
       confirmPassword,
-      // interests,
-      // interestOptions,
-      options,
-      selectedOptions,
+      selectedTags,
+      availableTags,
       errors,
       submitForm
     }

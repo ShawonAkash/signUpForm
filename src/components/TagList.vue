@@ -1,99 +1,56 @@
 <template>
-  <div>
-    <template v-for="(option, index) in selectedOptions" :key="index">
-      <span>
-        {{ option }}
-        <button @click="removeOption(option, index)">X</button>
-      </span>
-    </template>
-    <div>
-      <input
-        v-model="search"
-        @keyup.enter="addOption"
-        @blur="addOption"
-        @focus="open = true"
-        @keydown.arrow-up="highlightOption(-1)"
-        @keydown.arrow-down="highlightOption(1)"
-        @keydown.tab="addOption"
-        @keydown.escape="search = ''"
-        type="text"
-        placeholder="Search or add options..."
-      />
+  <div class="taglist">
+    <div v-for="tag in selectedTags" :key="tag"  >
+      <span class="bg-red-600 px-3 py-1 rounded-lg">{{ tag }}</span>
+      <span @click="removeTag(tag)">x</span>
     </div>
-    <div v-if="open">
-      <ul>
-        <li
-          v-for="(option, index) in filteredOptions"
-          :key="index"
-          @click="addOption(option)"
-          :class="{ highlight: index === highlightedIndex }"
-        >
-          {{ option }}
-        </li>
-      </ul>
+    <div v-for="tag in availableTags" :key="tag" @click="addTag(tag)">
+      {{ tag }}
     </div>
   </div>
 </template>
 
 <script>
-import { reactive, computed, toRefs } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 
-export default {
+export default defineComponent({
   props: {
-    options: {
-      type: Array,
-      default: () => []
-    },
-    max: {
-      type: Number,
-      default: 3
-    }
+    value: Array,
+    tags: Array,
+    maxTags: Number
   },
   setup(props) {
-    const state = reactive({
-      search: '',
-      open: false,
-      highlightedIndex: -1,
-      selectedOptions: []
-    })
+    const selectedTags = ref(props.value || [])
+const availableTags = ref(props.tags || [])
 
-    const filteredOptions = computed(() => {
-      return props.options.filter(
-        (option) =>
-          !state.selectedOptions.includes(option) &&
-          option.toLowerCase().includes(state.search.toLowerCase())
+    function addTag(tag) {
+      if (selectedTags.value.length < props.maxTags) {
+        selectedTags.value.push(tag)
+        availableTags.value = availableTags.value.filter((t) => t !== tag)
+        // update the prop with the new tags
+        this.$emit('update:selectedTags', selectedTags.value)
+      }
+    }
+
+    function removeTag(tag) {
+      selectedTags.value = selectedTags.value.filter((t) => t !== tag)
+      availableTags.value.push(tag)
+      // update the prop with the new tags
+      this.$emit('update:selectedTags', selectedTags.value)
+    }
+
+    onMounted(() => {
+      availableTags.value = availableTags.value.filter(
+        (tag) => !selectedTags.value.includes(tag)
       )
     })
 
-    function addOption(option) {
-      if (!state.selectedOptions.includes(option)) {
-        state.selectedOptions.push(option)
-        state.search = ''
-        state.open = false
-        state.highlightedIndex = -1
-      }
-    }
-
-    function removeOption(option, index) {
-      state.selectedOptions.splice(index, 1)
-    }
-
-    function highlightOption(direction) {
-      state.highlightedIndex += direction
-      if (state.highlightedIndex < script - 1) {
-        state.highlightedIndex = filteredOptions.value.length - 1
-      }
-      if (state.highlightedIndex >= filteredOptions.value.length) {
-        state.highlightedIndex = -1
-      }
-    }
     return {
-      ...toRefs(state),
-      filteredOptions,
-      addOption,
-      removeOption,
-      highlightOption
+      selectedTags,
+      availableTags,
+      addTag,
+      removeTag
     }
   }
-}
+})
 </script>
