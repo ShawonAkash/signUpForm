@@ -67,16 +67,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import axios from 'axios'
 import { defineComponent, ref, computed } from 'vue'
 import TagList from './TagList.vue'
 
-export default defineComponent({
-  components: {
-    TagList
-  },
-  setup() {
     const forms = ref([])
     const name = ref('')
     const email = ref('')
@@ -131,17 +126,5 @@ export default defineComponent({
         console.log(error)
       }
     }
-    return {
-      forms,
-      name,
-      email,
-      password,
-      confirmPassword,
-      selectedTags,
-      availableTags,
-      errors,
-      submitForm
-    }
-  }
-})
+    
 </script>
