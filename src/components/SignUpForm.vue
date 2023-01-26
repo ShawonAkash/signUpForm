@@ -1,6 +1,9 @@
 <template>
   <div class="container mx-auto">
-    <form class="bg-white p-6 rounded-lg shadow-md">
+    <form
+      class="bg-white p-6 rounded-lg shadow-md"
+      @submit.prevent="submitForm"
+    >
       <h1 class="text-lg font-medium mb-2">Sign Up</h1>
       <label class="block text-gray-700 mb-2">Name:</label>
       <input
@@ -35,17 +38,13 @@
         Passwords do not match
       </p>
       <label>Interests:</label>
-      <TagList v-model="selectedTags" :tags="availableTags" :max-tags="3" />
+      <!-- <TagList v-model="selectedTags" :max-tags="3" /> -->
+      <TagList :tags="tags" @selectedTag="handleSelectedTags" :max-tags="3" />
       <p class="text-red-500" v-if="errors.interests">
         Please select at least one interest
       </p>
       <div class="text-center mt-4">
-        <button
-          @click.prevent="submitForm"
-          class="bg-blue-500 p-2 rounded-lg text-white"
-        >
-          Submit
-        </button>
+        <button class="bg-blue-500 p-2 rounded-lg text-white">Submit</button>
       </div>
     </form>
     <table class="mt-6 w-full">
@@ -58,9 +57,15 @@
       </thead>
       <tbody>
         <tr v-for="form in forms" :key="form.name">
-          <td class="px-4 py-2">{{ form.name }}</td>
-          <td class="px-4 py-2">{{ form.email }}</td>
-          <td>{{ selectedTags.join(', ') }}</td>
+          <td class="px-4 py-2 flex items-center justify-center">
+            {{ form.name }}
+          </td>
+          <td class="px-4 py-2 items-center justify-center">
+            {{ form.email }}
+          </td>
+          <td class="items-center justify-center">
+            {{ form.interests.join(', ') }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -72,25 +77,25 @@ import axios from 'axios'
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import TagList from './TaglistComponent.vue'
 
+let currentId = 1
 const forms = ref([])
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const selectedTags = ref([])
-const availableTags = ref([
-  'Work',
-  'Education',
-  'Hobby',
-  'Freelance',
-  'Business'
-])
+const tags = ref(['Work', 'Education', 'Hobby', 'Freelance', 'Business'])
 const errors = ref({
   name: false,
   email: false,
   password: false,
   confirmPassword: false
 })
+
+const handleSelectedTags = (selectedTag) => {
+  selectedTags.value = selectedTag
+  console.log(selectedTags.value)
+}
 
 function validateEmail(email) {
   // regex for email validation
@@ -116,12 +121,13 @@ async function submitForm() {
   // send form data to json file
   try {
     const formData = {
+      id: currentId + Math.random(),
       name: name.value,
       email: email.value,
       interests: selectedTags.value
     }
     console.log(selectedTags.value)
-    await axios.post('http://localhost:3000/profile', formData)
+    await axios.post(`http://localhost:3000/profile`, formData)
     forms.value.push(formData)
     name.value = ''
     email.value = ''

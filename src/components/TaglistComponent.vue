@@ -1,67 +1,102 @@
 <template>
-  <div class="taglist flex flex-wrap">
-    <div
-      v-for="tag in selectedTags"
-      :key="tag"
-      class="bg-blue-500 text-white rounded-full px-3 py-1 mr-2 mb-2"
-    >
-      <span class="">{{ tag }}</span>
-      <span @click="removeTag(tag)" class="ml-2 cursor-pointer text-white"
-        >&times;</span
-      >
+  <div class="taglist">
+    <div class="taglist-input-container">
+      <div class="relative clearfix">
+        <div class="selected-tags-container float-right absolute top-2 right-0">
+          <span
+            v-for="tag in selectedTag"
+            :key="tag"
+            class="
+              bg-blue-500
+              text-white
+              rounded-full
+              px-2
+              py-1
+              mr-2
+              mb-1
+              text-xs
+            "
+          >
+            {{ tag }}
+            <span @click="removeTag(tag)" class="cursor-pointer text-white"
+              >&times;</span
+            >
+          </span>
+        </div>
+      </div>
+      <input
+        v-model="search"
+        @input="filterTags"
+        @keyup.enter="selectTag"
+        class="border p-2 rounded-lg w-full"
+        placeholder="Search for tags..."
+        @focus="inFocus = true"
+      />
     </div>
-    <div
-      v-for="tag in availableTags"
-      :key="tag"
-      @click="addTag(tag)"
-      class="rounded-full px-3 py-1 mr-2 mb-2"
-    >
-      {{ tag }}
+    <div class="taglist-tags-container" v-if="inFocus && search.length > 0">
+      <span
+        v-for="tag in filteredTags"
+        :key="tag"
+        class="taglist-tag text-xs flex"
+        @click="selectTag(tag)"
+      >
+        {{ tag }}
+      </span>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
-    value: Array,
-    tags: Array,
-    maxTags: Number
+    tags: {
+      type: Array,
+      default: () => []
+    },
+    maxTags: {
+      type: Number,
+      default: 3
+    }
   },
-  setup(props) {
-    const selectedTags = ref(props.value || [])
-    const availableTags = ref(props.tags || [])
-
-    function addTag(tag) {
-      if (selectedTags.value.length < props.maxTags) {
-        selectedTags.value.push(tag)
-        availableTags.value = availableTags.value.filter((t) => t !== tag)
-        // update the prop with the new tags
-        this.$emit('update:selectedTags', selectedTags.value)
-      }
-    }
-
-    function removeTag(tag) {
-      selectedTags.value = selectedTags.value.filter((t) => t !== tag)
-      availableTags.value.push(tag)
-      // update the prop with the new tags
-      this.$emit('update:selectedTags', selectedTags.value)
-    }
-
-    onMounted(() => {
-      availableTags.value = availableTags.value.filter(
-        (tag) => !selectedTags.value.includes(tag)
-      )
-    })
-
+  data() {
     return {
-      selectedTags,
-      availableTags,
-      addTag,
-      removeTag
+      search: '',
+      selectedTag: [],
+      inFocus: false
+    }
+  },
+  computed: {
+    filteredTags() {
+      return this.tags.filter((tag) =>
+        tag.toLowerCase().includes(this.search.toLowerCase())
+      )
+    }
+  },
+  methods: {
+    filterTags() {
+      this.search = this.search.trim()
+    },
+    selectTag(tag) {
+      if (
+        !this.selectedTag.includes(tag) &&
+        this.selectedTag.length < this.maxTags
+      ) {
+        this.selectedTag.push(tag)
+        this.$emit('selectedTag', this.selectedTag)
+        this.search = ''
+      }
+    },
+    removeTag(tag) {
+      this.selectedTag = this.selectedTag.filter((t) => t !== tag)
     }
   }
-})
+}
 </script>
+
+<style scoped>
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+</style>
