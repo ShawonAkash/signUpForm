@@ -1,10 +1,21 @@
 <template>
-  <div class="taglist">
-    <div v-for="tag in selectedTags" :key="tag"  >
-      <span class="bg-red-600 px-3 py-1 rounded-lg">{{ tag }}</span>
-      <span @click="removeTag(tag)">x</span>
+  <div class="taglist flex flex-wrap">
+    <div
+      v-for="tag in selectedTags"
+      :key="tag"
+      class="bg-blue-500 text-white rounded-full px-3 py-1 mr-2 mb-2"
+    >
+      <span class="">{{ tag }}</span>
+      <span @click="removeTag(tag)" class="ml-2 cursor-pointer text-white"
+        >&times;</span
+      >
     </div>
-    <div v-for="tag in availableTags" :key="tag" @click="addTag(tag)">
+    <div
+      v-for="tag in availableTags"
+      :key="tag"
+      @click="addTag(tag)"
+      class="rounded-full px-3 py-1 mr-2 mb-2"
+    >
       {{ tag }}
     </div>
   </div>
@@ -21,7 +32,7 @@ export default defineComponent({
   },
   setup(props) {
     const selectedTags = ref(props.value || [])
-const availableTags = ref(props.tags || [])
+    const availableTags = ref(props.tags || [])
 
     function addTag(tag) {
       if (selectedTags.value.length < props.maxTags) {
