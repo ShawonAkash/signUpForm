@@ -1,8 +1,8 @@
 <template>
   <div class="taglist">
-    <div class="taglist-input-container">
-      <div class="relative clearfix">
-        <div class="selected-tags-container float-right absolute top-2 right-0">
+    <div class="taglist-input-container border rounded-lg flex">
+      <div class="mt-2">
+        <div class="selected-tags-container">
           <span
             v-for="tag in selectedTag"
             :key="tag"
@@ -24,20 +24,32 @@
           </span>
         </div>
       </div>
-      <input
-        v-model="search"
-        @input="filterTags"
-        @keyup.enter="selectTag"
-        class="border p-2 rounded-lg w-full"
-        placeholder="Search for tags..."
-        @focus="inFocus = true"
-      />
+      <div>
+        <input
+          v-model="search"
+          @input="filterTags"
+          @keyup.space="
+            filteredTags.length ? selectedTag.push(filteredTags[0]) : null
+          "
+          @keyup.delete="selectedTag.pop()"
+          class="border-none outline-none p-2 rounded-lg w-full"
+          placeholder="Search for tags..."
+          @focus="inFocus = true"
+        />
+      </div>
     </div>
-    <div class="taglist-tags-container" v-if="inFocus && search.length > 0">
+    <div class="taglist-tags-container rounded-lg bg-slate-100" v-if="inFocus && search.length > 0">
       <span
         v-for="tag in filteredTags"
         :key="tag"
-        class="taglist-tag text-xs flex"
+        class="
+          taglist-tag
+          text-sm
+          flex
+          py-1
+          shadow-sm
+          hover:bg-blue-500
+        "
         @click="selectTag(tag)"
       >
         {{ tag }}
@@ -51,7 +63,7 @@ export default {
   props: {
     tags: {
       type: Array,
-      default: () => []
+      default: () => [(isHovered = false)]
     },
     maxTags: {
       type: Number,
@@ -67,8 +79,10 @@ export default {
   },
   computed: {
     filteredTags() {
-      return this.tags.filter((tag) =>
-        tag.toLowerCase().includes(this.search.toLowerCase())
+      return this.tags.filter(
+        (tag) =>
+          !this.selectedTag.includes(tag) &&
+          tag.toLowerCase().includes(this.search.toLowerCase())
       )
     }
   },
@@ -92,11 +106,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.clearfix::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-</style>

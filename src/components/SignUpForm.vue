@@ -37,11 +37,11 @@
       <p class="text-red-500" v-if="errors.confirmPassword">
         Passwords do not match
       </p>
-      <label>Interests:</label>
+      <label>Interests: (Max 3)</label>
       <!-- <TagList v-model="selectedTags" :max-tags="3" /> -->
       <TagList :tags="tags" @selectedTag="handleSelectedTags" :max-tags="3" />
       <p class="text-red-500" v-if="errors.interests">
-        Please select at least one interest
+        Please select one to three interest
       </p>
       <div class="text-center mt-4">
         <button class="bg-blue-500 p-2 rounded-lg text-white">Submit</button>
@@ -74,7 +74,7 @@
 
 <script setup>
 import axios from 'axios'
-import { defineComponent, ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted, watchEffect } from 'vue'
 import TagList from './TaglistComponent.vue'
 
 let currentId = 1
@@ -89,11 +89,20 @@ const errors = ref({
   name: false,
   email: false,
   password: false,
-  confirmPassword: false
+  confirmPassword: false,
+  interests: false
 })
 
-const handleSelectedTags = (selectedTag) => {
-  selectedTags.value = selectedTag
+watchEffect(() => {
+  if (selectedTags.value.length > 3) {
+    errors.value.interests = true
+  } else {
+    errors.value.interests = false
+  }
+})
+
+const handleSelectedTags = (tag) => {
+  selectedTags.value = tag
   console.log(selectedTags.value)
 }
 
@@ -110,11 +119,14 @@ async function submitForm() {
   errors.value.email = !validateEmail(email.value)
   errors.value.password = !password.value
   errors.value.confirmPassword = password.value !== confirmPassword.value
+  errors.value.interests =
+    !selectedTags.value.length || selectedTags.value.length > 2
   if (
     errors.value.name ||
     errors.value.email ||
     errors.value.password ||
-    errors.value.confirmPassword
+    errors.value.confirmPassword ||
+    errors.value.interests
   ) {
     return
   }
