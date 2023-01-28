@@ -29,27 +29,25 @@
           v-model="search"
           @input="filterTags"
           @keyup.space="
-            filteredTags.length ? selectedTag.push(filteredTags[0]) : null
+            filteredTags.length
+              ? selectedTag.push(filteredTags[0])
+              : null
           "
-          @keyup.delete="selectedTag.pop()"
+          @keyup.delete="removeLastTag"
           class="border-none outline-none p-2 rounded-lg w-full"
           placeholder="Search for tags..."
           @focus="inFocus = true"
         />
       </div>
     </div>
-    <div class="taglist-tags-container rounded-lg bg-slate-100" v-if="inFocus && search.length > 0">
+    <div
+      class="taglist-tags-container rounded-lg bg-slate-100"
+      v-if="inFocus && search.length > 0"
+    >
       <span
         v-for="tag in filteredTags"
         :key="tag"
-        class="
-          taglist-tag
-          text-sm
-          flex
-          py-1
-          shadow-sm
-          hover:bg-blue-500
-        "
+        class="taglist-tag text-sm flex py-1 shadow-sm hover:bg-blue-500"
         @click="selectTag(tag)"
       >
         {{ tag }}
@@ -63,17 +61,21 @@ export default {
   props: {
     tags: {
       type: Array,
-      default: () => [(isHovered = false)]
+      default: () => []
     },
     maxTags: {
       type: Number,
       default: 3
+    },
+    modelValue: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return {
       search: '',
-      selectedTag: [],
+      selectedTag: this.modelValue,
       inFocus: false
     }
   },
@@ -96,12 +98,22 @@ export default {
         this.selectedTag.length < this.maxTags
       ) {
         this.selectedTag.push(tag)
-        this.$emit('selectedTag', this.selectedTag)
+        this.$emit('input', this.selectedTag)
         this.search = ''
       }
     },
     removeTag(tag) {
       this.selectedTag = this.selectedTag.filter((t) => t !== tag)
+      this.$emit('input', this.selectedTag)
+    },
+    removeLastTag() {
+      this.selectedTag.pop()
+      this.$emit('input', this.selectedTag)
+    }
+  },
+  watch: {
+    modelValue(newValue) {
+      this.selectedTag = newValue
     }
   }
 }

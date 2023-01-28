@@ -39,7 +39,8 @@
       </p>
       <label>Interests: (Max 3)</label>
       <!-- <TagList v-model="selectedTags" :max-tags="3" /> -->
-      <TagList :tags="tags" @selectedTag="handleSelectedTags" :max-tags="3" />
+      <!-- <TagList :tags="tags" @selectedTag="handleSelectedTags" :max-tags="3" /> -->
+      <tag-list v-model="selectedTags" :tags="tags" :max-tags="3" />
       <p class="text-red-500" v-if="errors.interests">
         Please select one to three interest
       </p>
@@ -101,10 +102,7 @@ watchEffect(() => {
   }
 })
 
-const handleSelectedTags = (tag) => {
-  selectedTags.value = tag
-  console.log(selectedTags.value)
-}
+
 
 function validateEmail(email) {
   // regex for email validation
@@ -120,7 +118,7 @@ async function submitForm() {
   errors.value.password = !password.value
   errors.value.confirmPassword = password.value !== confirmPassword.value
   errors.value.interests =
-    !selectedTags.value.length || selectedTags.value.length > 2
+    !selectedTags.value.length || selectedTags.value.length > 3
   if (
     errors.value.name ||
     errors.value.email ||
